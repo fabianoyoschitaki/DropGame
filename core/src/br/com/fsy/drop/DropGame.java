@@ -106,12 +106,20 @@ public class DropGame extends ApplicationAdapter {
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - 64 / 2;
 		}
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) bucket.x -= 200 * Gdx.graphics.getDeltaTime();
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) bucket.x += 200 * Gdx.graphics.getDeltaTime();
+		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			bucket.x -= 200 * Gdx.graphics.getDeltaTime();
+		}
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			bucket.x += 200 * Gdx.graphics.getDeltaTime();
+		}
 
 		// make sure the bucket stays within the screen bounds
-		if(bucket.x < 0) bucket.x = 0;
-		if(bucket.x > 800 - 64) bucket.x = 800 - 64;
+		if(bucket.x < 0) {
+			bucket.x = 0;
+		}
+		if(bucket.x > 800 - 64) {
+			bucket.x = 800 - 64;
+		}
 
 		// check if we need to create a new raindrop
 		if(TimeUtils.nanoTime() - lastDropTime > 1000000000) spawnRaindrop();
@@ -123,7 +131,9 @@ public class DropGame extends ApplicationAdapter {
 		while(iter.hasNext()) {
 			Rectangle raindrop = iter.next();
 			raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-			if(raindrop.y + 64 < 0) iter.remove();
+			if(raindrop.y + 64 < 0) {
+				iter.remove();
+			}
 			if(raindrop.overlaps(bucket)) {
 				dropSound.play();
 				iter.remove();
