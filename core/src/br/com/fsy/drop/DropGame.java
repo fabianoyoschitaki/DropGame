@@ -28,6 +28,18 @@ public class DropGame extends ApplicationAdapter {
 	private Array<Rectangle> raindrops;
 	private long lastDropTime;
 
+	private static int SCREEN_WIDTH = 800;
+	private static int SCREEN_HEIGHT = 480;
+
+	private static int BUCKET_WIDTH_HEIGHT = 64;
+	private static int DROP_WIDTH_HEIGHT = 64;
+
+	private static int BUCKET_Y_POSITION = 20;
+
+	private static long ONE_SECOND_IN_MILLIS = 1000000000;
+
+	private static int GAME_VELOCITY = 200;
+
 	@Override
 	public void create() {
 		// load the images for the droplet and the bucket, 64x64 pixels each
@@ -49,15 +61,15 @@ public class DropGame extends ApplicationAdapter {
 		// Think of it as a virtual window into our world. We currently interpret the units as pixels to make our
 		// life a little easier. There's nothing preventing us from using other units though, e.g. meters or whatever
 		// you have. Cameras are very powerful and allow you to do a lot of things we won't cover in this basic tutorial.
-		camera.setToOrtho(false, 800, 480);
+		camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 		batch = new SpriteBatch();
 
 		// create a Rectangle to logically represent the bucket
 		bucket = new Rectangle();
-		bucket.x = 800 / 2 - 64 / 2; // center the bucket horizontally
-		bucket.y = 20; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
-		bucket.width = 64;
-		bucket.height = 64;
+		bucket.x = SCREEN_WIDTH / 2 - BUCKET_WIDTH_HEIGHT / 2; // center the bucket horizontally
+		bucket.y = BUCKET_Y_POSITION; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
+		bucket.width = BUCKET_WIDTH_HEIGHT;
+		bucket.height = BUCKET_WIDTH_HEIGHT;
 
 		// create the raindrops array and spawn the first raindrop
 		raindrops = new Array<Rectangle>();
@@ -66,10 +78,10 @@ public class DropGame extends ApplicationAdapter {
 
 	private void spawnRaindrop() {
 		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, 800-64);
-		raindrop.y = 480;
-		raindrop.width = 64;
-		raindrop.height = 64;
+		raindrop.x = MathUtils.random(0, SCREEN_WIDTH - DROP_WIDTH_HEIGHT);
+		raindrop.y = SCREEN_HEIGHT;
+		raindrop.width = DROP_WIDTH_HEIGHT;
+		raindrop.height = DROP_WIDTH_HEIGHT;
 		raindrops.add(raindrop);
 		lastDropTime = TimeUtils.nanoTime();
 	}
@@ -104,25 +116,25 @@ public class DropGame extends ApplicationAdapter {
 			Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
-			bucket.x = touchPos.x - 64 / 2;
+			bucket.x = touchPos.x - (BUCKET_WIDTH_HEIGHT / 2);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			bucket.x -= 200 * Gdx.graphics.getDeltaTime();
+			bucket.x -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			bucket.x += 200 * Gdx.graphics.getDeltaTime();
+			bucket.x += GAME_VELOCITY * Gdx.graphics.getDeltaTime();
 		}
 
 		// make sure the bucket stays within the screen bounds
 		if(bucket.x < 0) {
 			bucket.x = 0;
 		}
-		if(bucket.x > 800 - 64) {
-			bucket.x = 800 - 64;
+		if(bucket.x > SCREEN_WIDTH - BUCKET_WIDTH_HEIGHT) {
+			bucket.x = SCREEN_WIDTH - BUCKET_WIDTH_HEIGHT;
 		}
 
 		// check if we need to create a new raindrop
-		if(TimeUtils.nanoTime() - lastDropTime > 1000000000) spawnRaindrop();
+		if(TimeUtils.nanoTime() - lastDropTime > ONE_SECOND_IN_MILLIS) spawnRaindrop();
 
 		// move the raindrops, remove any that are beneath the bottom edge of
 		// the screen or that hit the bucket. In the later case we play back
@@ -130,8 +142,8 @@ public class DropGame extends ApplicationAdapter {
 		Iterator<Rectangle> iter = raindrops.iterator();
 		while(iter.hasNext()) {
 			Rectangle raindrop = iter.next();
-			raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-			if(raindrop.y + 64 < 0) {
+			raindrop.y -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
+			if(raindrop.y + DROP_WIDTH_HEIGHT < 0) {
 				iter.remove();
 			}
 			if(raindrop.overlaps(bucket)) {
