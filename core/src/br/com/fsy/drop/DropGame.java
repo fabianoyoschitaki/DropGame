@@ -36,7 +36,7 @@ public class DropGame extends ApplicationAdapter {
 
 	private static int BUCKET_Y_POSITION = 20;
 
-	private static long ONE_SECOND_IN_MILLIS = 1000000000;
+	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000/2;
 
 	private static int GAME_VELOCITY = 200;
 
@@ -112,18 +112,20 @@ public class DropGame extends ApplicationAdapter {
 		batch.end();
 
 		// process user input
-		if(Gdx.input.isTouched()) {
+		//if(Gdx.input.isTouched()) {
 			Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+		Gdx.app.log("DropGame", "Before unproject: " + touchPos.x + ", " + touchPos.y + ", " + touchPos.z);
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - (BUCKET_WIDTH_HEIGHT / 2);
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			bucket.x -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			bucket.x += GAME_VELOCITY * Gdx.graphics.getDeltaTime();
-		}
+		Gdx.app.log("DropGame", "After unproject: " + touchPos.x + ", " + touchPos.y + ", " + touchPos.z);
+		//}
+		//if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+		//	bucket.x -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
+		//}
+		//if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		//	bucket.x += GAME_VELOCITY * Gdx.graphics.getDeltaTime();
+		//}
 
 		// make sure the bucket stays within the screen bounds
 		if(bucket.x < 0) {
@@ -134,7 +136,7 @@ public class DropGame extends ApplicationAdapter {
 		}
 
 		// check if we need to create a new raindrop
-		if(TimeUtils.nanoTime() - lastDropTime > ONE_SECOND_IN_MILLIS) spawnRaindrop();
+		if(TimeUtils.nanoTime() - lastDropTime > DROP_RESPAWN_TIME_IN_MILLIS) spawnRaindrop();
 
 		// move the raindrops, remove any that are beneath the bottom edge of
 		// the screen or that hit the bucket. In the later case we play back
