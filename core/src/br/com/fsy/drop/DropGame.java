@@ -28,8 +28,8 @@ public class DropGame extends ApplicationAdapter {
 	private Array<Rectangle> raindrops;
 	private long lastDropTime;
 
-	private static int SCREEN_WIDTH = 800;
-	private static int SCREEN_HEIGHT = 480;
+	public static int SCREEN_WIDTH = 544;
+	public static int SCREEN_HEIGHT = 816;
 
 	private static int BUCKET_WIDTH_HEIGHT = 64;
 	private static int DROP_WIDTH_HEIGHT = 64;
