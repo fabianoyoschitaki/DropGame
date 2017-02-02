@@ -45,6 +45,7 @@ tmp/
 *.swp
 *~.nib
 local.properties
+gradle.properties
 .settings/
 .loadpath
 .externalToolBuilders/
