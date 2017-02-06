@@ -8,6 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -18,6 +19,8 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class DropGame extends ApplicationAdapter {
+	private int midPointY;
+
 	private Texture dropImage;
 	private Texture bucketImage;
 	private Sound dropSound;
@@ -26,25 +29,46 @@ public class DropGame extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private Rectangle bucket;
 	private Array<Rectangle> raindrops;
+	private Array<Integer> raindropValues;
 	private long lastDropTime;
 
-	public static int SCREEN_WIDTH = 544;
-	public static int SCREEN_HEIGHT = 816;
+	private int score;
+	public static BitmapFont font, shadow;
+
+	//public static int SCREEN_WIDTH = 544;
+	//public static int SCREEN_HEIGHT = 816;
+
+	public static int SCREEN_WIDTH = 435;
+	public static int SCREEN_HEIGHT = 652;
 
 	private static int BUCKET_WIDTH_HEIGHT = 64;
 	private static int DROP_WIDTH_HEIGHT = 64;
 
 	private static int BUCKET_Y_POSITION = 20;
 
-	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000/2;
+	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000/4;
 
-	private static int GAME_VELOCITY = 200;
+	private static int GAME_VELOCITY = 400;
+	private static String bucketCalculation;
+	private static int number1, number2;
+	private static int resultado;
 
 	@Override
 	public void create() {
+		midPointY = (int) (SCREEN_HEIGHT/2);
+
+		font = new BitmapFont(Gdx.files.internal("text.fnt"));
+		font.getData().setScale(1, 1);
+
+		shadow = new BitmapFont(Gdx.files.internal("shadow.fnt"));
+		shadow.getData().setScale(1, 1);
+
+		score = 0;
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
 		bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+
+		aleatorizaNumeros();
 
 		// load the drop sound effect and the rain background "music"
 		dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -76,6 +100,13 @@ public class DropGame extends ApplicationAdapter {
 		spawnRaindrop();
 	}
 
+	private void aleatorizaNumeros() {
+		number1 = MathUtils.random(0,10);
+		number2 = MathUtils.random(1,10);
+		resultado = number1 + number2;
+		bucketCalculation = String.valueOf(number1 + "+" + number2);
+	}
+
 	private void spawnRaindrop() {
 		Rectangle raindrop = new Rectangle();
 		raindrop.x = MathUtils.random(0, SCREEN_WIDTH - DROP_WIDTH_HEIGHT);
@@ -105,21 +136,26 @@ public class DropGame extends ApplicationAdapter {
 		// begin a new batch and draw the bucket and
 		// all drops
 		batch.begin();
+		int length = ("" + score).length();
+		shadow.draw(batch, "" + score, SCREEN_WIDTH/2 - (3 * length), midPointY + 200);
+		font.draw(batch, "" + score, SCREEN_WIDTH/2 - (3 * length), midPointY + 199);
 		batch.draw(bucketImage, bucket.x, bucket.y);
+		shadow.draw(batch, bucketCalculation, bucket.x-BUCKET_WIDTH_HEIGHT/2, bucket.y+BUCKET_WIDTH_HEIGHT);
+		font.draw(batch, bucketCalculation, bucket.x-BUCKET_WIDTH_HEIGHT/2, bucket.y+BUCKET_WIDTH_HEIGHT);
 		for(Rectangle raindrop: raindrops) {
 			batch.draw(dropImage, raindrop.x, raindrop.y);
 		}
 		batch.end();
 
 		// process user input
-		//if(Gdx.input.isTouched()) {
+		if(Gdx.input.isTouched()) {
 			Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 		Gdx.app.log("DropGame", "Before unproject: " + touchPos.x + ", " + touchPos.y + ", " + touchPos.z);
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - (BUCKET_WIDTH_HEIGHT / 2);
 		Gdx.app.log("DropGame", "After unproject: " + touchPos.x + ", " + touchPos.y + ", " + touchPos.z);
-		//}
+		}
 		//if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 		//	bucket.x -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
 		//}
@@ -149,7 +185,9 @@ public class DropGame extends ApplicationAdapter {
 				iter.remove();
 			}
 			if(raindrop.overlaps(bucket)) {
+				aleatorizaNumeros();
 				dropSound.play();
+				score += 1;
 				iter.remove();
 			}
 		}
