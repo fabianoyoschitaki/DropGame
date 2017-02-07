@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -101,10 +102,11 @@ public class DropGame extends ApplicationAdapter {
 
 		// create a Rectangle to logically represent the bucket
 		bucket = new Rectangle();
-		bucket.x = (gameWidth/2) - (bucketWidthHeight /2); // center the bucket horizontally
-		bucket.y = bucketYPosition; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
 		bucket.width = bucketWidthHeight;
 		bucket.height = bucketWidthHeight;
+
+		bucket.x = (gameWidth/2) - (bucket.width /2); // center the bucket horizontally
+		bucket.y = bucketYPosition; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
 
 		// create the raindrops array and spawn the first raindrop
 		raindrops = new Array<Rectangle>();
@@ -216,9 +218,8 @@ public class DropGame extends ApplicationAdapter {
 	private void drawBucket() {
 		batch.draw(bucketImage, bucket.x, bucket.y, bucketWidthHeight, bucketWidthHeight);
 		int length = (bucketCalculation).length();
-
-		shadow.draw(batch, bucketCalculation, bucket.x - (2 * length), bucket.y);
-		font.draw(batch, bucketCalculation, bucket.x - (2 * length), bucket.y);
+		shadow.draw(batch, bucketCalculation, gameWidth/2 - (5 * length), bucket.y);
+		font.draw(batch, bucketCalculation, gameWidth/2 - (5 * length), bucket.y);
 	}
 
 	private void drawScore() {
