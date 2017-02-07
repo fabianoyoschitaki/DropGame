@@ -50,6 +50,7 @@ public class DropGame extends ApplicationAdapter {
 	private static String bucketCalculation;
 	private static int number1, number2;
 	private static int resultado;
+	private static int operacao;
 
 	@Override
 	public void create() {
@@ -69,10 +70,10 @@ public class DropGame extends ApplicationAdapter {
 		bucketYPosition = (int) (screenHeight * .1);
 
 		font = new BitmapFont(Gdx.files.internal("text.fnt"));
-		font.getData().setScale(0.5f, 0.5f);
+		font.getData().setScale(screenHeight * 0.0011f, screenHeight * 0.0011f);
 
 		shadow = new BitmapFont(Gdx.files.internal("shadow.fnt"));
-		shadow.getData().setScale(0.5f, 0.5f);
+		shadow.getData().setScale(screenHeight * 0.0011f, screenHeight * 0.0011f);
 
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -113,8 +114,17 @@ public class DropGame extends ApplicationAdapter {
 	private void aleatorizaNumeros() {
 		number1 = MathUtils.random(0,10);
 		number2 = MathUtils.random(1,10);
-		resultado = number1 + number2;
-		bucketCalculation = String.valueOf(number1 + "+" + number2);
+		operacao = MathUtils.random(0,2);
+		if (operacao == 0) {
+			resultado = number1 + number2;
+			bucketCalculation = String.valueOf(number1 + "+" + number2);
+		} else if (operacao == 1){
+			resultado = number1 - number2;
+			bucketCalculation = String.valueOf(number1 + "-" + number2);
+		} else if (operacao == 2){
+			resultado = number1 * number2;
+			bucketCalculation = String.valueOf(number1 + "*" + number2);
+		}
 	}
 
 	private void spawnRaindrop() {
