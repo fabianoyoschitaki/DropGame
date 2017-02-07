@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class DropGame extends ApplicationAdapter {
-	private int scoreYPosition;
+	public static BitmapFont font, shadow;
 
 	private Texture dropImage;
 	private Texture bucketImage;
@@ -32,8 +32,10 @@ public class DropGame extends ApplicationAdapter {
 	private Array<Integer> raindropValues;
 	private long lastDropTime;
 
-	private int score;
-	public static BitmapFont font, shadow;
+	public static int score;
+	public static int raindropWithResult;
+	public static int scoreYPosition;
+	public static boolean isRaindropWithResultAlive;
 
 	public static float _screenWidth;
 	public static float _screenHeight;
@@ -45,17 +47,21 @@ public class DropGame extends ApplicationAdapter {
 
 	private static int bucketYPosition;
 
-	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000/2;
+	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000;
 
-	private static int GAME_VELOCITY = 100;
+	private static int GAME_VELOCITY = 80;
 	private static String bucketCalculation;
 	private static int number1, number2;
 	private static int resultado;
 	private static int operacao;
 
+	public static final int MAX_DROPS = 5;
+
 	@Override
 	public void create() {
 		score = 0;
+		raindropWithResult = 0;
+		isRaindropWithResultAlive = false;
 
 		_screenWidth = Gdx.graphics.getWidth();
 		_screenHeight = Gdx.graphics.getHeight();
@@ -65,8 +71,6 @@ public class DropGame extends ApplicationAdapter {
 
 		bucketWidthHeight = (int) (gameHeight * .1);
 		dropWidthHeight = bucketWidthHeight;
-
-		Gdx.app.log("AQUI", bucketWidthHeight + "");
 
 		bucketYPosition = (int) (gameHeight * .1);
 
@@ -79,8 +83,6 @@ public class DropGame extends ApplicationAdapter {
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
 		bucketImage = new Texture(Gdx.files.internal("bucket.png"));
-
-		aleatorizaNumeros();
 
 		// load the drop sound effect and the rain background "music"
 		dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -110,6 +112,8 @@ public class DropGame extends ApplicationAdapter {
 
 		// create the raindrops array and spawn the first raindrop
 		raindrops = new Array<Rectangle>();
+		raindropValues = new Array<Integer>();
+		aleatorizaNumeros();
 		spawnRaindrop();
 	}
 
@@ -127,16 +131,42 @@ public class DropGame extends ApplicationAdapter {
 			resultado = number1 * number2;
 			bucketCalculation = String.valueOf(number1 + "*" + number2);
 		}
+		if (raindropValues.contains(resultado, true)){
+			isRaindropWithResultAlive = true;
+		} else {
+			isRaindropWithResultAlive = false;
+		}
+		//raindropWithResult = MathUtils.random(1, 10);
 	}
 
 	private void spawnRaindrop() {
+		if (raindropWithResult == 0 && !isRaindropWithResultAlive){
+			raindropWithResult = MathUtils.random(1,MAX_DROPS);
+		}
+		int dropValue;
+		if (raindropWithResult == 1 && !isRaindropWithResultAlive){
+			isRaindropWithResultAlive = true;
+			dropValue = resultado;
+		} else {
+			do {
+				dropValue = MathUtils.random(0, 100);
+			} while (dropValue == resultado || raindropValues.contains(dropValue, true));
+		}
+		raindropValues.add(dropValue);
 		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, gameWidth - dropWidthHeight);
-		raindrop.y = gameHeight;
+		resetRainDropPosition(raindrop);
 		raindrop.width = dropWidthHeight;
 		raindrop.height = dropWidthHeight;
 		raindrops.add(raindrop);
 		lastDropTime = TimeUtils.nanoTime();
+		if (!isRaindropWithResultAlive) {
+			raindropWithResult -= 1;
+		}
+	}
+
+	private void resetRainDropPosition(Rectangle raindrop) {
+		raindrop.x = MathUtils.random(0, gameWidth - dropWidthHeight);
+		raindrop.y = gameHeight;
 	}
 
 	@Override
@@ -188,30 +218,46 @@ public class DropGame extends ApplicationAdapter {
 		}
 
 		// check if we need to create a new raindrop
-		if(TimeUtils.nanoTime() - lastDropTime > DROP_RESPAWN_TIME_IN_MILLIS) spawnRaindrop();
+		if (TimeUtils.nanoTime() - lastDropTime > DROP_RESPAWN_TIME_IN_MILLIS && raindrops.size < MAX_DROPS) {
+			spawnRaindrop();
+		}
 
 		// move the raindrops, remove any that are beneath the bottom edge of
 		// the screen or that hit the bucket. In the later case we play back
 		// a sound effect as well.
 		Iterator<Rectangle> iter = raindrops.iterator();
+		int cont = 0;
 		while(iter.hasNext()) {
 			Rectangle raindrop = iter.next();
 			raindrop.y -= GAME_VELOCITY * Gdx.graphics.getDeltaTime();
-			if(raindrop.y + dropWidthHeight < 0) {
-				iter.remove();
+			if (raindrop.y + dropWidthHeight < 0) {
+				resetRainDropPosition(raindrop);
 			}
-			if(raindrop.overlaps(bucket)) {
-				aleatorizaNumeros();
-				dropSound.play();
-				score += 1;
-				iter.remove();
+			if (raindrop.overlaps(bucket)) {
+				//
+				if (resultado == raindropValues.get(cont)) {
+					aleatorizaNumeros();
+					dropSound.play();
+					score += 1;
+					iter.remove();
+					raindropValues.removeIndex(cont);
+				} else {
+					score -= 1;
+					dropSound.play();
+					iter.remove();
+					raindropValues.removeIndex(cont);
+				}
 			}
+			cont++;
 		}
 	}
 
 	private void drawDrops() {
-		for (Rectangle raindrop: raindrops) {
-			batch.draw(dropImage, raindrop.x, raindrop.y, dropWidthHeight, dropWidthHeight);
+		for (int cont = 0; cont < raindrops.size; cont++) {
+			batch.draw(dropImage, raindrops.get(cont).x, raindrops.get(cont).y, dropWidthHeight, dropWidthHeight);
+			int length = (raindropValues.get(cont) + "").length();
+			shadow.draw(batch, raindropValues.get(cont) + "", raindrops.get(cont).x, raindrops.get(cont).y + (int)(dropWidthHeight * 1.7));
+			font.draw(batch, raindropValues.get(cont) + "", raindrops.get(cont).x, (raindrops.get(cont).y + (int)(dropWidthHeight * 1.7)) - 1 );
 		}
 	}
 
