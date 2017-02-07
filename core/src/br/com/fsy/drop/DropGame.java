@@ -34,8 +34,8 @@ public class DropGame extends ApplicationAdapter {
 	private int score;
 	public static BitmapFont font, shadow;
 
-	public static float screenWidth;
-	public static float screenHeight;
+	public static float _screenWidth;
+	public static float _screenHeight;
 	public static float gameWidth;
 	public static float gameHeight;
 
@@ -46,7 +46,7 @@ public class DropGame extends ApplicationAdapter {
 
 	private static long DROP_RESPAWN_TIME_IN_MILLIS = 1000000000/2;
 
-	private static int GAME_VELOCITY = 200;
+	private static int GAME_VELOCITY = 100;
 	private static String bucketCalculation;
 	private static int number1, number2;
 	private static int resultado;
@@ -56,24 +56,24 @@ public class DropGame extends ApplicationAdapter {
 	public void create() {
 		score = 0;
 
-		screenWidth = Gdx.graphics.getWidth();
-		screenHeight = Gdx.graphics.getHeight();
+		_screenWidth = Gdx.graphics.getWidth();
+		_screenHeight = Gdx.graphics.getHeight();
 		gameWidth = 136;
-		gameHeight = screenHeight / (screenWidth / gameWidth);
-		scoreYPosition = (int) (screenHeight * .9);
+		gameHeight = _screenHeight / (_screenWidth / gameWidth);
+		scoreYPosition = (int) (gameHeight * .9);
 
-		bucketWidthHeight = (int) (screenHeight * .1);
+		bucketWidthHeight = (int) (gameHeight * .1);
 		dropWidthHeight = bucketWidthHeight;
 
 		Gdx.app.log("AQUI", bucketWidthHeight + "");
 
-		bucketYPosition = (int) (screenHeight * .1);
+		bucketYPosition = (int) (gameHeight * .1);
 
 		font = new BitmapFont(Gdx.files.internal("text.fnt"));
-		font.getData().setScale(screenHeight * 0.0011f, screenHeight * 0.0011f);
+		font.getData().setScale(gameHeight * 0.0011f, gameHeight * 0.0011f);
 
 		shadow = new BitmapFont(Gdx.files.internal("shadow.fnt"));
-		shadow.getData().setScale(screenHeight * 0.0011f, screenHeight * 0.0011f);
+		shadow.getData().setScale(gameHeight * 0.0011f, gameHeight * 0.0011f);
 
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -96,12 +96,12 @@ public class DropGame extends ApplicationAdapter {
 		// Think of it as a virtual window into our world. We currently interpret the units as pixels to make our
 		// life a little easier. There's nothing preventing us from using other units though, e.g. meters or whatever
 		// you have. Cameras are very powerful and allow you to do a lot of things we won't cover in this basic tutorial.
-		camera.setToOrtho(false, screenWidth, screenHeight);
+		camera.setToOrtho(false, gameWidth, gameHeight);
 		batch = new SpriteBatch();
 
 		// create a Rectangle to logically represent the bucket
 		bucket = new Rectangle();
-		bucket.x = (screenWidth/2) - (bucketWidthHeight /2); // center the bucket horizontally
+		bucket.x = (gameWidth/2) - (bucketWidthHeight /2); // center the bucket horizontally
 		bucket.y = bucketYPosition; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
 		bucket.width = bucketWidthHeight;
 		bucket.height = bucketWidthHeight;
@@ -129,8 +129,8 @@ public class DropGame extends ApplicationAdapter {
 
 	private void spawnRaindrop() {
 		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, screenWidth - dropWidthHeight);
-		raindrop.y = screenHeight;
+		raindrop.x = MathUtils.random(0, gameWidth - dropWidthHeight);
+		raindrop.y = gameHeight;
 		raindrop.width = dropWidthHeight;
 		raindrop.height = dropWidthHeight;
 		raindrops.add(raindrop);
@@ -181,8 +181,8 @@ public class DropGame extends ApplicationAdapter {
 		if(bucket.x < 0) {
 			bucket.x = 0;
 		}
-		if(bucket.x > screenWidth - bucketWidthHeight) {
-			bucket.x = screenWidth - bucketWidthHeight;
+		if(bucket.x > gameWidth - bucketWidthHeight) {
+			bucket.x = gameHeight - bucketWidthHeight;
 		}
 
 		// check if we need to create a new raindrop
@@ -217,14 +217,14 @@ public class DropGame extends ApplicationAdapter {
 		batch.draw(bucketImage, bucket.x, bucket.y, bucketWidthHeight, bucketWidthHeight);
 		int length = (bucketCalculation).length();
 
-		shadow.draw(batch, bucketCalculation, bucket.x - (4 * length), bucket.y);
-		font.draw(batch, bucketCalculation, bucket.x - (4 * length), bucket.y);
+		shadow.draw(batch, bucketCalculation, bucket.x - (2 * length), bucket.y);
+		font.draw(batch, bucketCalculation, bucket.x - (2 * length), bucket.y);
 	}
 
 	private void drawScore() {
 		int length = ("" + score).length();
-		shadow.draw(batch, "" + score, screenWidth/2 - (4 * length), scoreYPosition);
-		font.draw(batch, "" + score, screenWidth/2 - (4 * length), scoreYPosition - 1);
+		shadow.draw(batch, "" + score, gameWidth/2 - (4 * length), scoreYPosition);
+		font.draw(batch, "" + score, gameWidth/2 - (4 * length), scoreYPosition - 1);
 	}
 
 	@Override
