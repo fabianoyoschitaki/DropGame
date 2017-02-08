@@ -18,6 +18,8 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class DropGame extends ApplicationAdapter {
+
+	public static BitmapFont debugScreen;
 	public static BitmapFont font, shadow;
 
 	private Texture dropImage;
@@ -59,16 +61,17 @@ public class DropGame extends ApplicationAdapter {
 	private static int operacao;
 
 	public static final int MAX_DROPS = 5;
+	public static final int GAME_WIDTH = 136;
 	private boolean isGameRunning;
 
 	@Override
 	public void create() {
 		_screenWidth = Gdx.graphics.getWidth();
 		_screenHeight = Gdx.graphics.getHeight();
-		gameWidth = 136;
+		gameWidth = GAME_WIDTH;
 		gameHeight = _screenHeight / (_screenWidth / gameWidth);
-		scoreYPosition = (int) (gameHeight * .9);
 
+		scoreYPosition = (int) (gameHeight * .9);
 		bucketWidthHeight = (int) (gameHeight * .07);
 		dropWidthHeight = (int) (gameHeight * .07);
 		heartWidthHeight = (int) (gameHeight * .07);
@@ -77,9 +80,10 @@ public class DropGame extends ApplicationAdapter {
 
 		font = new BitmapFont(Gdx.files.internal("text.fnt"));
 		font.getData().setScale(gameHeight * 0.0008f, gameHeight * 0.0008f);
-
 		shadow = new BitmapFont(Gdx.files.internal("shadow.fnt"));
 		shadow.getData().setScale(gameHeight * 0.0008f, gameHeight * 0.0008f);
+
+		debugScreen = new BitmapFont(); //or use alex answer to use custom font
 
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -109,10 +113,11 @@ public class DropGame extends ApplicationAdapter {
 		bucket.x = (gameWidth/2) - (bucket.width /2); // center the bucket horizontally
 		bucket.y = bucketYPosition; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
 
-		startGame();
+		startNewGame();
+		Gdx.app.log(this.getClass().toString(), "Variáveis: gameWidth:" + gameWidth + " gameHeight:" + gameHeight);
 	}
 
-	private void startGame() {
+	private void startNewGame() {
 		isGameRunning = true;
 		rainMusic.play();
 		lives = 3;
@@ -289,7 +294,7 @@ public class DropGame extends ApplicationAdapter {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				camera.unproject(touchPos);
 				if (touchPos.y < (gameHeight/2) + 20 && touchPos.y > (gameHeight/2) - 20) {
-					startGame();
+					startNewGame();
 				}
 			}
 		}
@@ -300,11 +305,10 @@ public class DropGame extends ApplicationAdapter {
 	}
 
 	private void drawGameOver() {
-		int length = ("Touch to restart" + score).length();
+		int length = ("Touch to restart").length();
 		shadow.draw(batch, "Touch to restart", gameWidth/2 - (3 * length), gameHeight/2);
 		font.draw(batch, "Touch to restart", gameWidth/2 - (3 * length), (gameHeight/2) - 1);
-
-		length = ("Game Over!" + score).length();
+		length = ("Game Over!").length();
 		shadow.draw(batch, "Game Over!", gameWidth/2 - (3 * length), (int)(gameHeight * 1.2)/2);
 		font.draw(batch, "Game Over!", gameWidth/2 - (3 * length), (int)(gameHeight * 1.2/2) - 1);
 	}
